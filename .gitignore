@@ -59,3 +59,6 @@ typings/
 
 # config file containing consumer keys and access tokens
 config.js
+
+# sentPokemon.json file for storing the already sent pokemon
+sentPokemon.json
