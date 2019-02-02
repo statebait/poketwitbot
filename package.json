@@ -4,8 +4,7 @@
   "description": "A Simple Twitter Bot that tweets about a random pokemon everyday.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "setup": "node scripts/initSentPokemon.js"
+    "start": "node index.js"
   },
   "author": "Mohamed Shadab",
   "license": "MIT",

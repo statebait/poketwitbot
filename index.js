@@ -8,6 +8,16 @@ require('dotenv').config();
 //Temporary Array for storing the different random nos generated, to avoid checking the same nos in the sentPokemon.json file
 var temp = [];
 
+//Function to generate sentPokemon.json if not already generated
+function generateSentPokemon() {
+  if (!fs.existsSync('sentPokemon.json')) {
+    var data = {
+      idArray: []
+    };
+    fs.writeFileSync('sentPokemon.json', JSON.stringify(data));
+  }
+}
+
 //Function to Captilize the first letter of a string
 function capSize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -100,7 +110,10 @@ async function main() {
   firePokeTweet(pokemonID);
 }
 
+//Calls the generate sentPokemon.json function
+generateSentPokemon();
+
 //Schedules the main function to run once everyday
-schedule.scheduleJob('* * */1 * *', () => {
+schedule.scheduleJob('0 0 * * *', () => {
   main();
 });
