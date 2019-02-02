@@ -35,15 +35,7 @@ ACCESS_TOKEN = ''
 ACCESS_TOKEN_SECRET = ''
 ```
 
-**5. Creating the sentPokemon.json file**
-
-Run the following in the directory:
-
-```bash
-yarn setup
-```
-
-**6. Run the bot**
+**5. Run the bot**
 
 Run the following:
 
