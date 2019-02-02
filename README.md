@@ -2,7 +2,7 @@
 
 ## Description
 
-A Simple Twitter Bot built using the npm [twit](https://github.com/ttezel/twit) Twitter API Client and the [PokeAPI](https://pokeapi.co/). The bot tweets about a random pokemon everyday.
+A Simple Twitter Bot built using the [twit](https://github.com/ttezel/twit) Twitter API Client and the [PokeAPI](https://pokeapi.co/). The bot tweets about a random pokemon everyday.
 
 ## Installation
 
@@ -24,35 +24,34 @@ cd poketwitbot # Go to the project root directory
 yarn
 ```
 
-**4. Create Config File**
+**4. Create the Environment File**
 
-In the project root directory create a file `config.js` which contains your twitter app's access keys and tokens. A typical config.js file should look like this:
+In the project root directory create a file called `.env` which contains your twitter app's access keys and tokens. The file should look like this:
 
-```javascript
-//config.js
-
-module.exports = {
-  consumer_key: '', // insert consumer key (API Key)
-  consumer_secret: '', // insert consumer secret (API Secret)
-  access_token: '', //  insert access token
-  access_token_secret: '' // insert access token secret
-};
+```bash
+CONSUMER_KEY = ''
+CONSUMER_SECRET = ''
+ACCESS_TOKEN = ''
+ACCESS_TOKEN_SECRET = ''
 ```
 
 **5. Creating the sentPokemon.json file**
 
-- Navigate into the directory where you have cloned the repository
-- Create a new file called 'sentPokemon.json' and copy the following into it:
+Run the following in the directory:
 
-```json
-{
-  "idArray": []
-}
+```bash
+yarn setup
 ```
 
-**4. Run the bot**
+**6. Run the bot**
+
+Run the following:
 
 ```bash
 cd poketwitbot # Go to the project root directory, if not already
 yarn start
 ```
+
+## License
+
+This project is licensed under the MIT License - Copyright (c) 2019 Mohamed Shadab

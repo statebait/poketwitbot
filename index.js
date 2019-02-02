@@ -3,13 +3,17 @@ var fs = require('fs');
 var Chance = require('chance');
 var _ = require('lodash');
 var schedule = require('node-schedule');
+require('dotenv').config();
 
+//Temporary Array for storing the different random nos generated, to avoid checking the same nos in the sentPokemon.json file
 var temp = [];
 
+//Function to Captilize the first letter of a string
 function capSize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+//Generates the Unique Random No which is used as the id of the Pokemon to be tweeted
 async function getUniqueRandomNo(temp, count) {
   var chance = new Chance();
   var randomNo = chance.integer({ min: 1, max: 802 });
@@ -28,10 +32,16 @@ async function getUniqueRandomNo(temp, count) {
   }
 }
 
+//Function to tweet the Pokemon itself
 function firePokeTweet(id) {
   var twit = require('twit');
-  var config = require('./config.js');
-  var twitter = new twit(config);
+  var twitter = new twit({
+    consumer_key: process.env.CONSUMER_KEY,
+    consumer_secret: process.env.CONSUMER_SECRET,
+    access_token: process.env.ACCESS_TOKEN,
+    access_token_secret: process.env.ACCESS_TOKEN_SECRET
+  });
+  //Get request to PokeAPI using axios
   axios
     .get(`https://pokeapi.co/api/v2/pokemon/${id}/`)
     .then(function(response) {
@@ -50,6 +60,7 @@ function firePokeTweet(id) {
         }
       )}`;
       console.log('Log: firePokeTweet -> content\n', content);
+      //Posting the tweet
       twitter.post(
         'statuses/update',
         {
@@ -67,6 +78,7 @@ function firePokeTweet(id) {
     });
 }
 
+//Checking the randomly generated no. against the sent pokemon in sentPokemon.json
 async function checkUnique(id) {
   var data = await fs.readFileSync('sentPokemon.json');
   var jsonData = JSON.parse(data);
@@ -81,12 +93,14 @@ async function checkUnique(id) {
   }
 }
 
+//Main Function that runs everything
 async function main() {
   var count = 0;
   var pokemonID = await getUniqueRandomNo(temp, count);
   firePokeTweet(pokemonID);
 }
 
+//Schedules the main function to run once everyday
 schedule.scheduleJob('* * */1 * *', () => {
   main();
 });
