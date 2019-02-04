@@ -2,9 +2,9 @@
   "name": "poketwitbot",
   "version": "0.0.1",
   "description": "A Simple Twitter Bot that tweets about a random pokemon everyday.",
-  "main": "index.js",
+  "main": "bot.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node bot.js"
   },
   "author": "Mohamed Shadab",
   "license": "MIT",

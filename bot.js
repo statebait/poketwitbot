@@ -1,20 +1,20 @@
-var axios = require('axios');
-var fs = require('fs');
-var Chance = require('chance');
-var _ = require('lodash');
-var schedule = require('node-schedule');
-require('dotenv').config();
+var axios = require("axios");
+var fs = require("fs");
+var Chance = require("chance");
+var _ = require("lodash");
+var schedule = require("node-schedule");
+require("dotenv").config();
 
 //Temporary Array for storing the different random nos generated, to avoid checking the same nos in the sentPokemon.json file
 var temp = [];
 
 //Function to generate sentPokemon.json if not already generated
 function generateSentPokemon() {
-  if (!fs.existsSync('sentPokemon.json')) {
+  if (!fs.existsSync("sentPokemon.json")) {
     var data = {
       idArray: []
     };
-    fs.writeFileSync('sentPokemon.json', JSON.stringify(data));
+    fs.writeFileSync("sentPokemon.json", JSON.stringify(data));
   }
 }
 
@@ -28,7 +28,7 @@ async function getUniqueRandomNo(temp, count) {
   var chance = new Chance();
   var randomNo = chance.integer({ min: 1, max: 802 });
   if (count === 802) {
-    return 'Max Limit Reached';
+    return "Max Limit Reached";
   } else if (temp.includes(randomNo)) {
     count++;
     getUniqueRandomNo(temp);
@@ -44,7 +44,7 @@ async function getUniqueRandomNo(temp, count) {
 
 //Function to tweet the Pokemon itself
 function firePokeTweet(id) {
-  var twit = require('twit');
+  var twit = require("twit");
   var twitter = new twit({
     consumer_key: process.env.CONSUMER_KEY,
     consumer_secret: process.env.CONSUMER_SECRET,
@@ -69,16 +69,16 @@ function firePokeTweet(id) {
           return capSize(item.ability.name);
         }
       )}`;
-      console.log('Log: firePokeTweet -> content\n', content);
+      console.log("Log: firePokeTweet -> content\n", content);
       //Posting the tweet
       twitter.post(
-        'statuses/update',
+        "statuses/update",
         {
           status: content
         },
         function(err, data, response) {
           if (err) {
-            console.log('Caught Error', err.stack);
+            console.log("Caught Error", err.stack);
           }
         }
       );
@@ -90,7 +90,7 @@ function firePokeTweet(id) {
 
 //Checking the randomly generated no. against the sent pokemon in sentPokemon.json
 async function checkUnique(id) {
-  var data = await fs.readFileSync('sentPokemon.json');
+  var data = await fs.readFileSync("sentPokemon.json");
   var jsonData = JSON.parse(data);
   var arrayData = jsonData.idArray;
   if (arrayData.includes(id)) {
@@ -98,22 +98,23 @@ async function checkUnique(id) {
   } else {
     var newData = { idArray: [...arrayData, id] };
     var newJsonData = JSON.stringify(newData);
-    await fs.writeFileSync('sentPokemon.json', newJsonData);
+    await fs.writeFileSync("sentPokemon.json", newJsonData);
     return true;
   }
 }
 
 //Main Function that runs everything
 async function main() {
+  //Calls the generate sentPokemon.json function
+  generateSentPokemon();
   var count = 0;
   var pokemonID = await getUniqueRandomNo(temp, count);
   firePokeTweet(pokemonID);
 }
 
-//Calls the generate sentPokemon.json function
-generateSentPokemon();
+main();
 
 //Schedules the main function to run once everyday
-schedule.scheduleJob('0 0 * * *', () => {
+schedule.scheduleJob("0 0 * * *", () => {
   main();
 });
