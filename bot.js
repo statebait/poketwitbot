@@ -2,7 +2,7 @@ var axios = require("axios");
 var fs = require("fs");
 var Chance = require("chance");
 var _ = require("lodash");
-var schedule = require("node-schedule");
+var CronJob = require("../lib/cron.js").CronJob;
 require("dotenv").config();
 
 //Temporary Array for storing the different random nos generated, to avoid checking the same nos in the sentPokemon.json file
@@ -105,16 +105,17 @@ async function checkUnique(id) {
 
 //Main Function that runs everything
 async function main() {
-  //Calls the generate sentPokemon.json function
   generateSentPokemon();
   var count = 0;
   var pokemonID = await getUniqueRandomNo(temp, count);
   firePokeTweet(pokemonID);
 }
 
-main();
-
-//Schedules the main function to run once everyday
-schedule.scheduleJob("0 0 * * *", () => {
+//Create a job that runs the main function to run once everyday
+var job = new CronJob("00 00 00 * * *", function() {
+  const d = new Date();
   main();
+  console.log("Executed at:", d);
 });
+
+job.start();
