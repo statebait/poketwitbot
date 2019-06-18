@@ -60,5 +60,8 @@ typings/
 # config file containing consumer keys and access tokens
 config.js
 
-# sentPokemon.json file for storing the already sent pokemon
-sentPokemon.json
+# count of the pokemons sent
+count.json
+
+# The temporary image that is created
+temp.png

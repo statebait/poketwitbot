@@ -1,62 +1,42 @@
-var axios = require("axios");
-var fs = require("fs");
-var Chance = require("chance");
-var _ = require("lodash");
-var CronJob = require("../lib/cron.js").CronJob;
+const axios = require("axios");
+const fs = require("fs");
+const twit = require("twit");
+const _ = require("lodash");
+const cheerio = require("cheerio");
+const CronJob = require("cron").CronJob;
 require("dotenv").config();
 
-//Temporary Array for storing the different random nos generated, to avoid checking the same nos in the sentPokemon.json file
-var temp = [];
-
-//Function to generate sentPokemon.json if not already generated
-function generateSentPokemon() {
-  if (!fs.existsSync("sentPokemon.json")) {
-    var data = {
-      idArray: []
+//Function to generate count.json if not already generated
+exports.getCount = function() {
+  if (!fs.existsSync("./count.json")) {
+    const data = {
+      count: 2
     };
-    fs.writeFileSync("sentPokemon.json", JSON.stringify(data));
+    fs.writeFileSync("./count.json", JSON.stringify(data));
+    return 1;
+  } else {
+    const data = JSON.parse(fs.readFileSync("./count.json"));
+    const newData = { count: data.count + 1 };
+    fs.writeFileSync("./count.json", JSON.stringify(newData));
+    return data.count;
   }
-}
+};
 
 //Function to Captilize the first letter of a string
-function capSize(string) {
+exports.capSize = function(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
-}
+};
 
-//Generates the Unique Random No which is used as the id of the Pokemon to be tweeted
-async function getUniqueRandomNo(temp, count) {
-  var chance = new Chance();
-  var randomNo = chance.integer({ min: 1, max: 802 });
-  if (count === 802) {
-    return "Max Limit Reached";
-  } else if (temp.includes(randomNo)) {
-    count++;
-    getUniqueRandomNo(temp);
-  } else {
-    temp.push(randomNo);
-    if (await checkUnique(randomNo)) {
-      return randomNo;
-    } else {
-      getUniqueRandomNo(temp);
-    }
-  }
-}
-
-//Function to tweet the Pokemon itself
-function firePokeTweet(id) {
-  var twit = require("twit");
-  var twitter = new twit({
-    consumer_key: process.env.CONSUMER_KEY,
-    consumer_secret: process.env.CONSUMER_SECRET,
-    access_token: process.env.ACCESS_TOKEN,
-    access_token_secret: process.env.ACCESS_TOKEN_SECRET
-  });
-  //Get request to PokeAPI using axios
-  axios
+//Function to get the data of the pokemon
+exports.getPokemonData = async function(id) {
+  const { capSize } = module.exports;
+  let content, name;
+  await axios
     .get(`https://pokeapi.co/api/v2/pokemon/${id}/`)
-    .then(function(response) {
-      var data = response.data;
-      var content = `Today's Pokemon is ${capSize(
+    .then(response => {
+      const data = response.data;
+      name = data.name;
+      content = `Today's Pokemon is ${capSize(
         data.name
       )}!\n\nHere is some info about it:\n\nTypes - ${_.map(
         data.types,
@@ -69,50 +49,87 @@ function firePokeTweet(id) {
           return capSize(item.ability.name);
         }
       )}`;
-      console.log("Log: firePokeTweet -> content\n", content);
-      //Posting the tweet
-      twitter.post(
-        "statuses/update",
-        {
-          status: content
-        },
-        function(err, data, response) {
-          if (err) {
-            console.log("Caught Error", err.stack);
-          }
-        }
-      );
     })
-    .catch(function(error) {
-      console.log(error);
+    .catch(err => console.error(err));
+
+  return { content, name };
+};
+
+//Function to get the pokemons image
+exports.getImageAndTweet = function(stuff) {
+  const { fireTweet } = module.exports;
+  axios
+    .get(`https://www.pokemon.com/us/pokedex/${stuff.name}`)
+    .then(res => {
+      const $ = cheerio.load(res.data);
+      const imageUrl = $(".profile-images")
+        .children("img")
+        .attr("src");
+      axios
+        .get(imageUrl, {
+          responseType: "arraybuffer"
+        })
+        .then(response => {
+          const data = new Buffer.from(response.data, "binary");
+          return fs.writeFileSync("./temp.png", data);
+        })
+        .then(() => {
+          fireTweet(stuff);
+        })
+        .catch(err => console.error(err));
+    })
+    .catch(err => console.error(err));
+};
+
+exports.fireTweet = function(stuff) {
+  const twitter = new twit({
+    consumer_key: process.env.CONSUMER_KEY,
+    consumer_secret: process.env.CONSUMER_SECRET,
+    access_token: process.env.ACCESS_TOKEN,
+    access_token_secret: process.env.ACCESS_TOKEN_SECRET
+  });
+
+  const b64content = fs.readFileSync("./temp.png", { encoding: "base64" });
+  twitter.post("media/upload", { media_data: b64content }, function(
+    err,
+    data,
+    response
+  ) {
+    const mediaIdStr = data.media_id_string;
+    const altText = `Supposed to be an image of ${stuff.name}`;
+    const meta_params = {
+      media_id: mediaIdStr,
+      alt_text: { text: altText }
+    };
+
+    twitter.post("media/metadata/create", meta_params, function(
+      err,
+      data,
+      response
+    ) {
+      if (!err) {
+        const params = {
+          status: stuff.content,
+          media_ids: [mediaIdStr]
+        };
+
+        twitter.post("statuses/update", params, function(err, data, response) {
+          console.log("Tweeted!\n");
+        });
+      }
     });
-}
+  });
+};
 
-//Checking the randomly generated no. against the sent pokemon in sentPokemon.json
-async function checkUnique(id) {
-  var data = await fs.readFileSync("sentPokemon.json");
-  var jsonData = JSON.parse(data);
-  var arrayData = jsonData.idArray;
-  if (arrayData.includes(id)) {
-    return false;
-  } else {
-    var newData = { idArray: [...arrayData, id] };
-    var newJsonData = JSON.stringify(newData);
-    await fs.writeFileSync("sentPokemon.json", newJsonData);
-    return true;
-  }
-}
-
-//Main Function that runs everything
 async function main() {
-  generateSentPokemon();
-  var count = 0;
-  var pokemonID = await getUniqueRandomNo(temp, count);
-  firePokeTweet(pokemonID);
+  const { getCount, getPokemonData, getImageAndTweet } = module.exports;
+  const id = await getCount();
+  const data = await getPokemonData(id);
+  getImageAndTweet(data);
 }
 
-//Create a job that runs the main function to run once everyday
-var job = new CronJob("00 00 00 * * *", function() {
+// Create a job that runs the main function once everyday at midnight
+const job = new CronJob("00 00 00 * * *", function() {
   const d = new Date();
   main();
   console.log("Executed at:", d);

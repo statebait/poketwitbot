@@ -2,7 +2,7 @@
 
 ## Description
 
-A Simple Twitter Bot built using the [twit](https://github.com/ttezel/twit) Twitter API Client and the [PokeAPI](https://pokeapi.co/). The bot tweets about a random pokemon everyday.
+A Simple Twitter Bot built using the [twit](https://github.com/ttezel/twit) Twitter API Client and the [PokeAPI](https://pokeapi.co/). The bot tweets about a pokemon everyday.
 
 ## Installation
 
