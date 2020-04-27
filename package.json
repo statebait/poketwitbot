@@ -1,10 +1,10 @@
 {
   "name": "poketwitbot",
-  "version": "0.0.2",
-  "description": "A Simple Twitter Bot that tweets about a pokemon everyday.",
-  "main": "bot.js",
+  "version": "1.0.0",
+  "description": "A Simple Twitter Bot that tweets about a pokemon.",
+  "main": "n/a",
   "author": "Mohamed Shadab",
-  "repository": "https://github.com/shadxx7/poketwitbot.git",
+  "repository": "https://github.com/statebait/poketwitbot.git",
   "private": true,
   "license": "MIT",
   "dependencies": {
