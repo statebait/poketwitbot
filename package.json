@@ -3,9 +3,6 @@
   "version": "0.0.2",
   "description": "A Simple Twitter Bot that tweets about a pokemon everyday.",
   "main": "bot.js",
-  "scripts": {
-    "start": "node bot.js"
-  },
   "author": "Mohamed Shadab",
   "repository": "https://github.com/shadxx7/poketwitbot.git",
   "private": true,
@@ -13,7 +10,6 @@
   "dependencies": {
     "axios": "^0.19.0",
     "cheerio": "^1.0.0-rc.3",
-    "cron": "^1.7.1",
     "dotenv": "^8.0.0",
     "lodash": "^4.17.13",
     "twit": "^2.2.9"
