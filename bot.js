@@ -20,8 +20,15 @@ const createTweetData = ({
   description,
   path,
 }) => {
+  let firstTweetContent = `Another Pokemon is ${capSize(
+    name
+  )}!\n\n${description}`.trim();
+  if (firstTweetContent.length > 280) {
+    firstTweetContent = firstTweetContent.slice(0, 277);
+    firstTweetContent = firstTweetContent + "...";
+  }
   return {
-    firstTweetContent: `Today's Pokemon is ${capSize(name)}!\n\n${description}`,
+    firstTweetContent,
     secondTweetContent: `@${
       process.env.TWITTER_USERNAME
     } Here is some more info about it:\n\nTypes - ${types.reduce(
@@ -110,12 +117,13 @@ const fireTweet = async function (tweetData) {
       media_ids: [mediaIdStr],
     };
     const tweet = await twitter.post("statuses/update", params);
+
     await twitter.post("statuses/update", {
       status: tweetData.secondTweetContent,
       in_reply_to_status_id: tweet.data.id_str,
     });
   } catch (err) {
-    return err;
+    throw err;
   }
 };
 
@@ -129,6 +137,7 @@ async function main(id) {
     await fireTweet(tweetData);
     return { success: true, message: "Successfully tweeted." };
   } catch (err) {
+    console.log(err);
     return { error: true, message: "Something went wrong." };
   }
 }
