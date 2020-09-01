@@ -20,7 +20,7 @@ const createTweetData = ({
   description,
   path,
 }) => {
-  let firstTweetContent = `Another Pokemon is ${capSize(
+  let firstTweetContent = `Today's Pokemon is ${capSize(
     name
   )}!\n\n${description}`.trim();
   if (firstTweetContent.length > 280) {
