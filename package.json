@@ -8,7 +8,7 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "cheerio": "^1.0.0-rc.9",
     "dotenv": "^9.0.2",
     "twit": "^2.2.9"
